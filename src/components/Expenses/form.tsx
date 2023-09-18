@@ -6,10 +6,12 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { ChangeEvent, ChangeEventHandler, useState } from "react";
 import { Expense } from "../../types/types";
+import {DateTime} from "luxon"
 
 const initialState: Expense = {
   description: "",
   amount: 0,
+  dueDate: DateTime.now().day,
 };
 
 type ExpenseFormProps = {
@@ -45,12 +47,26 @@ const ExpenseForm = ({ addExpense }: ExpenseFormProps) => {
         />
       </div>
       <div className="grid w-56 items-center gap-1.5">
+        <Label htmlFor="dueDate">Dia vencimiento</Label>
+        <Input
+          type="number"
+          id="dueDate"
+          name="dueDate"
+          placeholder="Dia vencimiento"
+          value={expense.dueDate}
+          onChange={handleChange}
+          max="31"
+          min="0"
+        />
+      </div>
+      <div className="grid w-56 items-center gap-1.5">
         <Label htmlFor="amount">Monto</Label>
         <Input
           type="number"
           id="amount"
           placeholder="Monto"
           name="amount"
+          min="0"
           value={expense.amount}
           onChange={handleChange}
         />
