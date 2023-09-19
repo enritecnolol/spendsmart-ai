@@ -3,7 +3,7 @@
 import { useState } from "react";
 import ExpenseForm from "./form";
 import { columns } from "./table/columns";
-import { DataTable } from "./table/data-table";
+import { DataTable } from "../data-table";
 import { Expense } from "../../types/types";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ArrowUpRight } from "lucide-react";

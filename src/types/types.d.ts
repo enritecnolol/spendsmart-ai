@@ -3,3 +3,9 @@ export type Expense = {
   amount: number
   dueDate: number
 }
+
+export type Income = {
+  description: string
+  amount: number
+  incomeFrequency: IncomeFrequencyEnum
+}
