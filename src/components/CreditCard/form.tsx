@@ -8,15 +8,15 @@ import { ChangeEvent, useState } from "react";
 import { CreditCard } from "../../types/types";
 
 type CreditCardFormProps = {
-  addCreditCard: (creditCard: CreditCard) => void
-}
+  addCreditCard: (creditCard: CreditCard) => void;
+};
 
 const initialState: CreditCard = {
   name: "",
   totalDebt: 0,
   minimumPayment: 0,
   paymentDay: 1,
-}
+};
 
 const CreditCardForm = ({ addCreditCard }: CreditCardFormProps) => {
   const [creditCard, setCreditCard] = useState<CreditCard>(initialState);
@@ -30,9 +30,9 @@ const CreditCardForm = ({ addCreditCard }: CreditCardFormProps) => {
   };
 
   const submitCreditCard = () => {
-    addCreditCard(creditCard)
-    setCreditCard(initialState)
-  }
+    addCreditCard(creditCard);
+    setCreditCard(initialState);
+  };
 
   return (
     <div className="flex flex-wrap gap-5">
@@ -50,9 +50,7 @@ const CreditCardForm = ({ addCreditCard }: CreditCardFormProps) => {
         />
       </div>
       <div className="grid w-48 items-center gap-1.5">
-        <Label htmlFor="totalDebt">
-          Deuda total
-        </Label>
+        <Label htmlFor="totalDebt">Deuda total</Label>
         <Input
           type="number"
           id="totalDebt"
