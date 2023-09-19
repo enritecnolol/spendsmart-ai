@@ -36,7 +36,7 @@ const ExpenseForm = ({ addExpense }: ExpenseFormProps) => {
   return (
     <div className="flex gap-x-5">
       <div className="grid w-full items-center gap-1.5">
-        <Label htmlFor="description">Descripción</Label>
+        <Label htmlFor="description">Descripción <span className="text-red-600">*</span></Label>
         <Input
           type="text"
           id="description"
@@ -47,7 +47,7 @@ const ExpenseForm = ({ addExpense }: ExpenseFormProps) => {
         />
       </div>
       <div className="grid w-56 items-center gap-1.5">
-        <Label htmlFor="dueDate">Dia vencimiento</Label>
+        <Label htmlFor="dueDate">Dia vencimiento <span className="text-red-600">*</span></Label>
         <Input
           type="number"
           id="dueDate"
@@ -60,7 +60,7 @@ const ExpenseForm = ({ addExpense }: ExpenseFormProps) => {
         />
       </div>
       <div className="grid w-56 items-center gap-1.5">
-        <Label htmlFor="amount">Monto</Label>
+        <Label htmlFor="amount">Monto <span className="text-red-600">*</span></Label>
         <Input
           type="number"
           id="amount"

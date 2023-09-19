@@ -14,6 +14,7 @@ const Income = () => {
   const addIncome = (income: Income) => {
     setIncomes([...incomes, income]);
   };
+  
   return (
     <Card>
       <CardHeader>
