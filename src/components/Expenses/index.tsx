@@ -1,18 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useContext } from "react";
 import ExpenseForm from "./form";
 import { columns } from "./table/columns";
 import { DataTable } from "../data-table";
-import { Expense } from "../../types/types";
+import { Expense } from "@/types/types";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ArrowUpRight } from "lucide-react";
+import FinancialSituationContext from "@/context/UserFinancialInfoContext";
 
 const Expense = () => {
-  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const { financialSituation, setFinancialSituation } = useContext(FinancialSituationContext);
 
   const addExpense = (expense: Expense) => {
-    setExpenses([...expenses, expense]);
+    const newFinancialSituation = {
+      ...financialSituation,
+      expenses: [...financialSituation.expenses, expense]
+    }
+    setFinancialSituation(newFinancialSituation);
   };
 
   return (
@@ -27,7 +32,7 @@ const Expense = () => {
           <ExpenseForm addExpense={addExpense} />
         </div>
         <div className="mt-5">
-          <DataTable columns={columns} data={expenses} />
+          <DataTable columns={columns} data={financialSituation.expenses} />
         </div>
       </CardContent>
     </Card>

@@ -82,6 +82,8 @@ const CreditCardForm = ({ addCreditCard }: CreditCardFormProps) => {
           id="paymentDay"
           name="paymentDay"
           placeholder="Dia de pago"
+          max="31"
+          min="0"
           value={creditCard.paymentDay}
           onChange={handleChange}
         />

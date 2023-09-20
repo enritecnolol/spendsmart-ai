@@ -16,3 +16,9 @@ export type CreditCard = {
   minimumPayment: number;
   paymentDay: number;
 };
+
+export interface FinancialSituation {
+  expenses: Expense[];
+  incomes: Income[];
+  creditCards: CreditCard[];
+}

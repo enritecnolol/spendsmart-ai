@@ -3,16 +3,21 @@
 import { CreditCardIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import CreditCardForm from "./form";
-import { CreditCard } from "../../types/types";
-import { useState } from "react";
+import { CreditCard } from "@/types/types";
+import { useContext } from "react";
 import { DataTable } from "../data-table";
 import { columns } from "./table/columns";
+import FinancialSituationContext from "@/context/UserFinancialInfoContext";
 
 const CreditCard = () => {
-  const [creditCards, setCreditCards] = useState<CreditCard[]>([]);
+  const { financialSituation, setFinancialSituation } = useContext(FinancialSituationContext);
 
   const addCreditCard = (creditCard: CreditCard) => {
-    setCreditCards([...creditCards, creditCard]);
+    const newFinancialSituation = {
+      ...financialSituation,
+      creditCards: [...financialSituation.creditCards, creditCard]
+    }
+    setFinancialSituation(newFinancialSituation);
   };
 
   return (
@@ -27,7 +32,7 @@ const CreditCard = () => {
           <CreditCardForm addCreditCard={addCreditCard} />
         </div>
         <div className="mt-5">
-          <DataTable columns={columns} data={creditCards} />
+          <DataTable columns={columns} data={financialSituation.creditCards} />
         </div>
       </CardContent>
     </Card>
