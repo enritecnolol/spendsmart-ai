@@ -1,12 +1,12 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const roboto = Roboto({
-  weight: '400',
-  subsets: ['latin'],
-})
- 
+  weight: "400",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: "Spend Smart",
@@ -19,8 +19,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={roboto.className}>{children}</body>
-    </html>
+    <ClerkProvider appearance={{
+      layout: {
+        logoImageUrl: "http://localhost:3000/logo.png",
+        logoPlacement: "inside"
+      }
+    }}>
+      <html lang="en">
+        <body className={roboto.className}>{children}</body>
+      </html>
+    </ClerkProvider>
   );
 }
