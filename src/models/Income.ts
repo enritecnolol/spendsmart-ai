@@ -1,6 +1,7 @@
 import { Schema, model, models } from "mongoose";
 
 const incomeSchema = new Schema({
+  userId: String,
   description: String,
   amount: Number,
   incomeFrequency: {

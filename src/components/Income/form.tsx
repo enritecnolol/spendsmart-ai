@@ -1,4 +1,4 @@
-import { useState, ChangeEvent } from "react";
+import { useState, ChangeEvent, useEffect, Fragment } from "react";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "../ui/input";
 import {
@@ -9,9 +9,11 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Button } from "../ui/button";
-import { Plus } from "lucide-react";
+import { PenIcon, Plus } from "lucide-react";
 import { Income } from "../../types/types";
 import { IncomeFrequencyEnum } from "../../enum/enum";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
 
 const incomeFrequencyOption = [
   {
@@ -40,11 +42,34 @@ const initialState: Income = {
 };
 
 type IncomeFormProps = {
-  addIncome: (income: Income) => void;
+  editIncomeData: Income | null;
+  cleanEditIncome: () => void;
 };
 
-const IncomeForm = ({ addIncome }: IncomeFormProps) => {
+const IncomeForm = ({
+  editIncomeData = null,
+  cleanEditIncome,
+}: IncomeFormProps) => {
   const [income, setIncome] = useState<Income>(initialState);
+
+  const insertIncome = useMutation({
+    mutationFn: async (income: Income) => {
+      const response = await axios.post("/api/income", {
+        income,
+      });
+      return response;
+    },
+  });
+
+  const updateIncome = useMutation({
+    mutationFn: async (income: Income) => {
+      const response = await axios.put("/api/income", {
+        income,
+      });
+      return response;
+    },
+  });
+
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { value, name } = event.target;
     setIncome({
@@ -53,8 +78,13 @@ const IncomeForm = ({ addIncome }: IncomeFormProps) => {
     });
   };
 
-  const submitIncome = () => {
-    addIncome(income);
+  const submitIncome = async () => {
+    if (editIncomeData) {
+      updateIncome.mutate(income);
+      cleanEditIncome();
+    } else {
+      insertIncome.mutate(income);
+    }
     setIncome(initialState);
   };
 
@@ -65,10 +95,18 @@ const IncomeForm = ({ addIncome }: IncomeFormProps) => {
     });
   };
 
+  useEffect(() => {
+    if (editIncomeData) {
+      setIncome(editIncomeData);
+    }
+  }, [editIncomeData]);
+
   return (
     <div className="flex gap-x-5">
       <div className="grid w-full items-center gap-1.5">
-        <Label htmlFor="description">Descripción <span className="text-red-600">*</span></Label>
+        <Label htmlFor="description">
+          Descripción <span className="text-red-600">*</span>
+        </Label>
         <Input
           type="text"
           id="description"
@@ -79,7 +117,9 @@ const IncomeForm = ({ addIncome }: IncomeFormProps) => {
         />
       </div>
       <div className="grid w-56 items-center gap-1.5">
-        <Label htmlFor="incomeFrequency">Frecuencia de ingreso <span className="text-red-600">*</span></Label>
+        <Label htmlFor="incomeFrequency">
+          Frecuencia de ingreso <span className="text-red-600">*</span>
+        </Label>
         <Select
           value={income.incomeFrequency}
           onValueChange={handleSelectChange}
@@ -99,7 +139,9 @@ const IncomeForm = ({ addIncome }: IncomeFormProps) => {
         </Select>
       </div>
       <div className="grid w-56 items-center gap-1.5">
-        <Label htmlFor="amount">Monto <span className="text-red-600">*</span></Label>
+        <Label htmlFor="amount">
+          Monto <span className="text-red-600">*</span>
+        </Label>
         <Input
           type="number"
           id="amount"
@@ -113,7 +155,15 @@ const IncomeForm = ({ addIncome }: IncomeFormProps) => {
 
       <div className="flex justify-center items-end">
         <Button onClick={submitIncome}>
-          <Plus className="w-4 h-4 mr-2" /> Agregar
+          {editIncomeData ? (
+            <Fragment>
+              <PenIcon className="w-4 h-4 mr-2" /> Editar
+            </Fragment>
+          ) : (
+            <Fragment>
+              <Plus className="w-4 h-4 mr-2" /> Agregar
+            </Fragment>
+          )}
         </Button>
       </div>
     </div>

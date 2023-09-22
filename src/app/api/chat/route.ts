@@ -1,6 +1,12 @@
 // import { convertToContextPrompt } from "../../../lib/context";
-import { ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from "openai-edge";
+import {
+  ChatCompletionRequestMessageRoleEnum,
+  Configuration,
+  OpenAIApi,
+} from "openai-edge";
 import { OpenAIStream, StreamingTextResponse } from "ai";
+import { dbConnect } from "../../../lib/db/mongoose";
+import { NextResponse } from "next/server";
 
 export const runtime = "edge";
 
@@ -32,23 +38,31 @@ export async function POST() {
       AI assistant will not invent anything that is not drawn directly from the context.
       `,
     };
-    
+
     const response = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
-      messages: [
-        prompt
-      ],
+      messages: [prompt],
       stream: true,
     });
 
     const stream = OpenAIStream(response, {
       // save user message into DB
       onStart: async () => {},
-      onCompletion: async () => {}
-    })
+      onCompletion: async () => {},
+    });
 
     return new StreamingTextResponse(stream);
   } catch (error) {
     console.log("error - api/chat:", error);
   }
+}
+
+export async function GET() {
+  await dbConnect();
+  return NextResponse.json(
+    {
+      message: "hola",
+    },
+    { status: 200 }
+  );
 }

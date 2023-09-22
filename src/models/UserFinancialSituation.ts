@@ -5,6 +5,7 @@ import incomeSchema from "./Income"
 import creditCardSchema from "./CreditCard"
 
 const financialSituationSchema = new Schema({
+  userId: String,
   expenses: [expenseSchema],
   incomes: [incomeSchema],
   creditCards: [creditCardSchema],
