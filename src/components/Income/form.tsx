@@ -96,9 +96,7 @@ const IncomeForm = ({
   };
 
   useEffect(() => {
-    if (editIncomeData) {
-      setIncome(editIncomeData);
-    }
+    setIncome(editIncomeData ?? initialState);
   }, [editIncomeData]);
 
   return (

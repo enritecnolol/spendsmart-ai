@@ -6,7 +6,7 @@ import IncomeForm from "./form";
 import { Income } from "@/types/types";
 import { DataTable } from "../data-table";
 import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@clerk/nextjs";
 import { ColumnDef } from "@tanstack/react-table";
 import {
@@ -20,16 +20,34 @@ import {
 import { MoreVerticalIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import { useState } from "react";
+import ConfirmationDialog from "../ConfirmationDialog";
+import moneyFormatter from "../../lib/moneyFormatter";
 
 const Income = () => {
   const { userId } = useAuth();
-  const [editIncome, setEditIncome] = useState<Income | null>(null)
+  const [incomeToMutate, setIncomeToMutate] = useState<Income | null>(null);
+  const [openConfirmation, setOpenConfirmation] = useState(false);
 
-  const { data: incomes, isLoading, refetch } = useQuery({
+  const {
+    data: incomes,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["income", userId],
     queryFn: async () => {
       const response = await axios.get<Income[]>(`/api/income`);
       return response.data;
+    },
+  });
+
+  const deleteIncome = useMutation({
+    mutationFn: async (income: Income) => {
+      const response = await axios.delete("/api/income", {
+        params: {
+          _id: income._id,
+        }
+      });
+      return response;
     },
   });
 
@@ -51,12 +69,9 @@ const Income = () => {
       header: () => <div className="text-right">Monto</div>,
       cell: ({ row }) => {
         const amount = parseFloat(row.getValue("amount"));
-        const formatted = new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(amount);
-
-        return <div className="text-right font-medium">{formatted}</div>;
+        return (
+          <div className="text-right font-medium">{moneyFormatter(amount)}</div>
+        );
       },
     },
     {
@@ -76,13 +91,10 @@ const Income = () => {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => handleEditIncome(income)}
-                >
+                <DropdownMenuItem onClick={() => handleEditIncome(income)}>
                   Editar
                 </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => handleDeleteIncome(income)}>
+                <DropdownMenuItem onClick={() => handleDeleteIncome(income)}>
                   Eliminar
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -94,17 +106,29 @@ const Income = () => {
   ];
 
   const handleEditIncome = (income: Income) => {
-    setEditIncome(income);
+    setIncomeToMutate(income);
   };
 
-  const handleSuccessEdited = () => {
-    setEditIncome(null)
-    refetch()
-  }
+  const handleSuccessEdited = async () => {
+    setIncomeToMutate(null);
+    await refetch();
+  };
 
   const handleDeleteIncome = (income: Income) => {
-    console.log("Delete Income: ", income)
+    setIncomeToMutate(income);
+    setOpenConfirmation(true);
   };
+
+  const handleResetDelete = () => {
+    setIncomeToMutate(null);
+    setOpenConfirmation(false);
+  }
+
+  const handleContinueDelete = async () => {
+    deleteIncome.mutate(incomeToMutate as Income);
+    await refetch();
+    handleResetDelete()
+  }
 
   return (
     <Card>
@@ -115,7 +139,10 @@ const Income = () => {
       </CardHeader>
       <CardContent>
         <div className="w-full">
-          <IncomeForm editIncomeData={editIncome} cleanEditIncome={handleSuccessEdited}/>
+          <IncomeForm
+            editIncomeData={incomeToMutate}
+            cleanEditIncome={handleSuccessEdited}
+          />
         </div>
         <div className="mt-5">
           <DataTable
@@ -125,6 +152,19 @@ const Income = () => {
           />
         </div>
       </CardContent>
+      <ConfirmationDialog
+        open={openConfirmation}
+        title="Esta seguro de eliminar este ingreso?"
+        description={
+          incomeToMutate
+            ? `Ingreso: ${
+                incomeToMutate?.description
+              } - monto: ${moneyFormatter(incomeToMutate?.amount)}`
+            : ""
+        }
+        onCancel={handleResetDelete}
+        onContinue={handleContinueDelete}
+      />
     </Card>
   );
 };
