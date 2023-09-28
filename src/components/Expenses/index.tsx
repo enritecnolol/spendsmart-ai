@@ -10,9 +10,9 @@ import axios from "axios";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import ConfirmationDialog from "../ConfirmationDialog";
-import moneyFormatter from "../../lib/moneyFormatter";
-import { useAppDispatch, useAppSelector } from "../../app/store/hooks";
-import { selectExpense, setExpense } from "../../app/store/slices/expenseSlice";
+import moneyFormatter from "@/lib/moneyFormatter";
+import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
+import { selectExpense, setExpense } from "@/app/store/slices/expenseSlice";
 import {
   DropdownMenu,
   DropdownMenuContent,

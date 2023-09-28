@@ -52,6 +52,8 @@ const IncomeForm = ({
 }: IncomeFormProps) => {
   const [income, setIncome] = useState<Income>(initialState);
 
+  const isEditing = !!editIncomeData;
+
   const insertIncome = useMutation({
     mutationFn: async (income: Income) => {
       const response = await axios.post("/api/income", {
@@ -154,8 +156,8 @@ const IncomeForm = ({
       </div>
 
       <div className="flex justify-center items-end">
-        <Button onClick={submitIncome}>
-          {editIncomeData ? (
+        <Button onClick={submitIncome} className={isEditing ? "bg-orange-500" : ""}>
+          {isEditing ? (
             <Fragment>
               <PenIcon className="w-4 h-4 mr-2" /> Editar
             </Fragment>

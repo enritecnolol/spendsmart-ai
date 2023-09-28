@@ -1,9 +1,5 @@
-
-import { ReactNode } from "react";
-import { UserFinancialSituationProvider } from "../../context/UserFinancialInfoContext";
+import { Fragment, ReactNode } from "react";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  return (
-    <UserFinancialSituationProvider>{children}</UserFinancialSituationProvider>
-  );
+  return <Fragment>{children}</Fragment>;
 }

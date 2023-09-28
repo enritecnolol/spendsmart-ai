@@ -1,10 +1,10 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { PenIcon, Plus } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, Fragment, useEffect, useState } from "react";
 import { Expense } from "../../types/types";
 import {DateTime} from "luxon"
 import { useMutation } from "@tanstack/react-query";
@@ -23,7 +23,8 @@ type ExpenseFormProps = {
 
 const ExpenseForm = ({ editExpenseData, cleanEditExpense }: ExpenseFormProps) => {
   const [expense, setExpense] = useState<Expense>(initialState);
-
+  const isEditing = !!editExpenseData;
+  
   const insertExpense = useMutation({
     mutationKey: ["expenses"],
     mutationFn: async (expense: Expense) => {
@@ -110,8 +111,16 @@ const ExpenseForm = ({ editExpenseData, cleanEditExpense }: ExpenseFormProps) =>
         />
       </div>
       <div className="flex justify-center items-end">
-        <Button onClick={submitExpense}>
-          <Plus className="w-4 h-4 mr-2" /> Agregar
+      <Button onClick={submitExpense} className={isEditing ? "bg-orange-500" : ""}>
+          {isEditing ? (
+            <Fragment>
+              <PenIcon className="w-4 h-4 mr-2" /> Editar
+            </Fragment>
+          ) : (
+            <Fragment>
+              <Plus className="w-4 h-4 mr-2" /> Agregar
+            </Fragment>
+          )}
         </Button>
       </div>
     </div>

@@ -1,14 +1,17 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { PenIcon, Plus } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, Fragment, useEffect, useState } from "react";
 import { CreditCard } from "../../types/types";
+import axios from "axios";
+import { useMutation } from "@tanstack/react-query";
 
 type CreditCardFormProps = {
-  addCreditCard: (creditCard: CreditCard) => void;
+  editCreditCardData: CreditCard | null;
+  cleanEditCreditCard: () => void;
 };
 
 const initialState: CreditCard = {
@@ -18,8 +21,30 @@ const initialState: CreditCard = {
   paymentDay: 1,
 };
 
-const CreditCardForm = ({ addCreditCard }: CreditCardFormProps) => {
+const CreditCardForm = ({ editCreditCardData, cleanEditCreditCard }: CreditCardFormProps) => {
   const [creditCard, setCreditCard] = useState<CreditCard>(initialState);
+
+  const isEditing = !!editCreditCardData;
+
+  const insertCreditCard = useMutation({
+    mutationFn: async (creditCard: CreditCard) => {
+      const response = await axios.post("/api/credit-card", {
+        creditCard,
+      });
+      return response;
+    },
+    onSuccess: () => cleanEditCreditCard()
+  });
+
+  const updateCreditCard = useMutation({
+    mutationFn: async (creditCard: CreditCard) => {
+      const response = await axios.put("/api/credit-card", {
+        creditCard,
+      });
+      return response;
+    },
+    onSuccess: () => cleanEditCreditCard()
+  });
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { value, name } = event.target;
@@ -29,10 +54,19 @@ const CreditCardForm = ({ addCreditCard }: CreditCardFormProps) => {
     });
   };
 
-  const submitCreditCard = () => {
-    addCreditCard(creditCard);
+  const submitCreditCard = async () => {
+    if (editCreditCardData) {
+      updateCreditCard.mutate(creditCard);
+      cleanEditCreditCard();
+    } else {
+      insertCreditCard.mutate(creditCard);
+    }
     setCreditCard(initialState);
   };
+
+  useEffect(() => {
+    setCreditCard(editCreditCardData ?? initialState)
+  }, [editCreditCardData])
 
   return (
     <div className="flex flex-wrap gap-5">
@@ -89,8 +123,16 @@ const CreditCardForm = ({ addCreditCard }: CreditCardFormProps) => {
         />
       </div>
       <div className="flex justify-center items-end">
-        <Button onClick={submitCreditCard}>
-          <Plus className="w-4 h-4 mr-2" /> Agregar
+        <Button onClick={submitCreditCard} className={isEditing ? "bg-orange-500" : ""}>
+          {isEditing ? (
+            <Fragment>
+              <PenIcon className="w-4 h-4 mr-2" /> Editar
+            </Fragment>
+          ) : (
+            <Fragment>
+              <Plus className="w-4 h-4 mr-2" /> Agregar
+            </Fragment>
+          )}
         </Button>
       </div>
     </div>
