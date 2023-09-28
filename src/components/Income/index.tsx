@@ -7,7 +7,6 @@ import { Income } from "@/types/types";
 import { DataTable } from "../data-table";
 import axios from "axios";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useAuth } from "@clerk/nextjs";
 import { ColumnDef } from "@tanstack/react-table";
 import {
   DropdownMenu,
@@ -19,26 +18,33 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreVerticalIcon } from "lucide-react";
 import { Button } from "../ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ConfirmationDialog from "../ConfirmationDialog";
 import moneyFormatter from "../../lib/moneyFormatter";
+import { useAppDispatch, useAppSelector } from "../../app/store/hooks";
+import { selectIncome, setIncome } from "../../app/store/slices/incomeSlice";
 
 const Income = () => {
-  const { userId } = useAuth();
-  const [incomeToMutate, setIncomeToMutate] = useState<Income | null>(null);
   const [openConfirmation, setOpenConfirmation] = useState(false);
+  const dispatch = useAppDispatch()
+  const income = useAppSelector(selectIncome);
 
   const {
     data: incomes,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["income", userId],
     queryFn: async () => {
       const response = await axios.get<Income[]>(`/api/income`);
       return response.data;
     },
+    refetchOnWindowFocus: false,
+    enabled: false,
   });
+
+  useEffect(() => {
+    refetch()
+  }, [income])
 
   const deleteIncome = useMutation({
     mutationFn: async (income: Income) => {
@@ -106,27 +112,27 @@ const Income = () => {
   ];
 
   const handleEditIncome = (income: Income) => {
-    setIncomeToMutate(income);
+    dispatch(setIncome(income));
   };
 
   const handleSuccessEdited = async () => {
-    setIncomeToMutate(null);
-    await refetch();
+    dispatch(setIncome(null));
+    refetch();
   };
 
   const handleDeleteIncome = (income: Income) => {
-    setIncomeToMutate(income);
+    dispatch(setIncome(income));
     setOpenConfirmation(true);
   };
 
   const handleResetDelete = () => {
-    setIncomeToMutate(null);
+    dispatch(setIncome(null));
     setOpenConfirmation(false);
   }
 
   const handleContinueDelete = async () => {
-    deleteIncome.mutate(incomeToMutate as Income);
-    await refetch();
+    deleteIncome.mutate(income as Income);
+    refetch();
     handleResetDelete()
   }
 
@@ -140,7 +146,7 @@ const Income = () => {
       <CardContent>
         <div className="w-full">
           <IncomeForm
-            editIncomeData={incomeToMutate}
+            editIncomeData={income}
             cleanEditIncome={handleSuccessEdited}
           />
         </div>
@@ -156,10 +162,10 @@ const Income = () => {
         open={openConfirmation}
         title="Esta seguro de eliminar este ingreso?"
         description={
-          incomeToMutate
+          income
             ? `Ingreso: ${
-                incomeToMutate?.description
-              } - monto: ${moneyFormatter(incomeToMutate?.amount)}`
+                income?.description
+              } - monto: ${moneyFormatter(income?.amount)}`
             : ""
         }
         onCancel={handleResetDelete}
