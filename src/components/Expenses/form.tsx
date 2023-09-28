@@ -4,9 +4,11 @@ import { Plus } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { ChangeEvent, ChangeEventHandler, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { Expense } from "../../types/types";
 import {DateTime} from "luxon"
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
 
 const initialState: Expense = {
   description: "",
@@ -15,11 +17,38 @@ const initialState: Expense = {
 };
 
 type ExpenseFormProps = {
-  addExpense: (expense: Expense) => void;
+  editExpenseData: Expense | null;
+  cleanEditExpense: () => void;
 };
 
-const ExpenseForm = ({ addExpense }: ExpenseFormProps) => {
+const ExpenseForm = ({ editExpenseData, cleanEditExpense }: ExpenseFormProps) => {
   const [expense, setExpense] = useState<Expense>(initialState);
+
+  const insertExpense = useMutation({
+    mutationKey: ["expenses"],
+    mutationFn: async (expense: Expense) => {
+      const response = await axios.post("/api/expense", {
+        expense,
+      });
+      return response;
+    },
+    onSuccess: () => {
+      cleanEditExpense()
+    }
+  });
+
+  const updateExpense = useMutation({
+    mutationKey: ["expenses"],
+    mutationFn: async (expense: Expense) => {
+      const response = await axios.put("/api/expense", {
+        expense,
+      });
+      return response;
+    },
+    onSuccess: () => {
+      cleanEditExpense()
+    }
+  });
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { value, name } = event.target;
@@ -29,9 +58,18 @@ const ExpenseForm = ({ addExpense }: ExpenseFormProps) => {
     });
   };
   const submitExpense = () => {
-    addExpense(expense)
+    if (editExpenseData) {
+      updateExpense.mutate(expense);
+      cleanEditExpense();
+    } else {
+      insertExpense.mutate(expense);
+    }
     setExpense(initialState)
   }
+
+  useEffect(() => {
+    setExpense(editExpenseData ?? initialState);
+  }, [editExpenseData]);
 
   return (
     <div className="flex gap-x-5">

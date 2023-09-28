@@ -31,9 +31,10 @@ const Income = () => {
 
   const {
     data: incomes,
-    isLoading,
+    isFetching,
     refetch,
   } = useQuery({
+    queryKey: ["incomes"],
     queryFn: async () => {
       const response = await axios.get<Income[]>(`/api/income`);
       return response.data;
@@ -44,6 +45,7 @@ const Income = () => {
 
   useEffect(() => {
     refetch()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [income])
 
   const deleteIncome = useMutation({
@@ -55,6 +57,7 @@ const Income = () => {
       });
       return response;
     },
+    onSuccess: () => refetch()
   });
 
   const columns: ColumnDef<Income>[] = [
@@ -117,7 +120,7 @@ const Income = () => {
 
   const handleSuccessEdited = async () => {
     dispatch(setIncome(null));
-    refetch();
+    refetch()
   };
 
   const handleDeleteIncome = (income: Income) => {
@@ -132,7 +135,6 @@ const Income = () => {
 
   const handleContinueDelete = async () => {
     deleteIncome.mutate(income as Income);
-    refetch();
     handleResetDelete()
   }
 
@@ -154,7 +156,7 @@ const Income = () => {
           <DataTable
             columns={columns}
             data={incomes || []}
-            isLoading={isLoading}
+            isLoading={isFetching}
           />
         </div>
       </CardContent>

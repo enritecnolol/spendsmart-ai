@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { IncomeState, incomeReducer } from './slices/incomeSlice';
+import { ExpenseState, expenseReducer } from './slices/expenseSlice';
 
 export const store = configureStore({
   reducer: {
     income: incomeReducer,
+    expense: expenseReducer
   },
   devTools: true,
 })
@@ -12,4 +14,5 @@ export type AppDispatch = typeof store.dispatch
 
 export type RootState = {
   income: IncomeState;
+  expense: ExpenseState
 };

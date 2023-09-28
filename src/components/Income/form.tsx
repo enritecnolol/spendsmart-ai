@@ -59,6 +59,7 @@ const IncomeForm = ({
       });
       return response;
     },
+    onSuccess: () => cleanEditIncome()
   });
 
   const updateIncome = useMutation({
@@ -68,6 +69,7 @@ const IncomeForm = ({
       });
       return response;
     },
+    onSuccess: () => cleanEditIncome()
   });
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
