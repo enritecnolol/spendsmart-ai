@@ -5,21 +5,33 @@ import MessageList from "./MessageList";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Send } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Message } from "ai";
+import axios from "axios";
+import { useEffect } from "react";
 const ChatComponent = () => {
-  const { input, handleInputChange, handleSubmit } = useChat({
-    api: "/api/chat",
-    initialMessages: [],
+  const { data, isLoading } = useQuery({
+    queryKey: ["chat"],
+    queryFn: async () => {
+      const response = await axios.post<Message[]>(`/api/get-messages`);
+      return response.data;
+    },
   });
 
-  // useEffect(() => {
-  //   const messageContainer = document.getElementById("message-container");
-  //   if (messageContainer) {
-  //     messageContainer.scrollTo({
-  //       top: messageContainer.scrollHeight,
-  //       behavior: "smooth",
-  //     });
-  //   }
-  // }, [messages]);
+  const { input, handleInputChange, handleSubmit, messages } = useChat({
+    api: "/api/chat",
+    initialMessages: data || [],
+  });
+
+  useEffect(() => {
+    const messageContainer = document.getElementById("message-container");
+    if (messageContainer) {
+      messageContainer.scrollTo({
+        top: messageContainer.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages]);
 
   return (
     <div
@@ -31,7 +43,7 @@ const ChatComponent = () => {
       </div>
 
       {/* message list */}
-      <MessageList messages={[]} isLoading={false} />
+      <MessageList messages={messages} isLoading={isLoading} />
 
       <form
         onSubmit={handleSubmit}

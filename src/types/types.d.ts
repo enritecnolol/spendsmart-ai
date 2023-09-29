@@ -24,15 +24,7 @@ export type CreditCard = {
 };
 
 export interface FinancialSituation {
-  _id?: string;
-  userId?: string;
   expenses: Expense[];
   incomes: Income[];
   creditCards: CreditCard[];
 }
-
-export type TableAction = {
-  entity: "expense" | "income" | "creditCard" | null;
-  data: Expense | Income | CreditCard | null;
-  action: "edit" | "delete" | null;
-};

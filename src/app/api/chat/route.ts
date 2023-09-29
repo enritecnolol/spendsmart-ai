@@ -1,14 +1,20 @@
-// import { convertToContextPrompt } from "../../../lib/context";
 import {
   ChatCompletionRequestMessageRoleEnum,
   Configuration,
   OpenAIApi,
 } from "openai-edge";
 import { OpenAIStream, StreamingTextResponse } from "ai";
-import { dbConnect } from "../../../lib/db/mongoose";
+import { dbConnect } from "@/lib/db/mongoose";
 import { NextResponse } from "next/server";
+import Income from "@/models/Income";
+import { auth } from "@clerk/nextjs";
+import Expense from "@/models/Expense";
+import CreditCard from "@/models/CreditCard";
+import { convertToContextPrompt } from "@/lib/context";
+import { Message } from "ai/react";
+import MessageModel from "@/models/Message";
 
-export const runtime = "edge";
+// export const runtime = "edge";
 
 const config = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -16,10 +22,28 @@ const config = new Configuration({
 
 const openai = new OpenAIApi(config);
 
-export async function POST() {
+export async function POST(req: Request) {
   try {
-    // const context = convertToContextPrompt({});
-    const context = "";
+    const { messages } = await req.json();
+    const { userId } = auth();
+    await dbConnect();
+    const incomes = await Income.find({
+      userId,
+    });
+    const expenses = await Expense.find({
+      userId,
+    });
+    const creditCards = await CreditCard.find({
+      userId,
+    });
+
+    const context = convertToContextPrompt({
+      incomes,
+      expenses,
+      creditCards,
+    });
+
+    const lastMessage = messages[messages.length - 1];
 
     const prompt = {
       role: "system" as ChatCompletionRequestMessageRoleEnum,
@@ -28,7 +52,6 @@ export async function POST() {
       AI is a well-behaved and well-mannered individual.
       AI is always friendly, kind, and inspiring, and he is eager to provide vivid and thoughtful responses to the user.
       AI has the sum of all knowledge in their brain, and is able to accurately answer nearly any question about any topic in conversation.
-      AI assistant is a big fan of Pinecone and Vercel.
       START CONTEXT BLOCK
       ${context}
       END OF CONTEXT BLOCK
@@ -41,19 +64,34 @@ export async function POST() {
 
     const response = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
-      messages: [prompt],
+      messages: [
+        prompt,
+        ...messages.filter((message: Message) => message.role === "user"),
+      ],
       stream: true,
     });
 
     const stream = OpenAIStream(response, {
-      // save user message into DB
-      onStart: async () => {},
-      onCompletion: async () => {},
+      onStart: async () => {
+        await MessageModel.create({
+          userId,
+          content: lastMessage.content,
+          role: "user"
+        })
+      },
+      onCompletion: async (completion) => {
+        await MessageModel.create({
+          userId,
+          content: completion,
+          role: "system"
+        })
+      },
     });
 
     return new StreamingTextResponse(stream);
   } catch (error) {
     console.log("error - api/chat:", error);
+    return NextResponse.json({ message: error, success: false });
   }
 }
 
