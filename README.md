@@ -13,6 +13,8 @@ To create an online solution that assists individuals in maintaining more effect
 3. Develop an expense tracking tool that allows users to record and categorize their daily expenses, providing visual graphs and reports for better understanding of their spending habits.
 4. Provide a financial reporting feature that allows users to generate customized reports on their financial situation, such as statements, expense summaries, income reports, etc.
 5. Offer educational resources related to financial management, such as articles, tips, and guides, to help users acquire financial knowledge and skills.
+
+![Repo_List](public/Screenshot1.png)
    
 ## Getting Started
 
